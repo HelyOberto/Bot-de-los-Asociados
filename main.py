@@ -49,4 +49,20 @@ async def on_message_delete(message):
 
     await borrarMensajeEspejo(message)
 
+#Esto hace que Render no piense que mi bot se tomo vacaciones y lo siga obligando a trabajar por el resto de la eternidad!!!
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Sigo aca, no hace falta que me lo recuerdes..."
+
+def run():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+keep_alive()
 bot.run(llave_Discord)
