@@ -14,9 +14,26 @@ async def on_ready():
 @bot.event
 async def on_message(message):
 
-    await conectar(message,"escaladaIngles","escaladaEspanol")
+    #Esto evita que bot no se cofunda consigo mismo, me suele pasar cuando me volteo y me miro al espejo
+    if (message.webhook_id in lista_webhooks) or (bot.user == message.author):
+        return
 
-    await conectar(message,"senderoIngles","senderoEspanol")
+    for conexion in conexiones.keys():
+        for canal in conexiones[conexion]:
+            if message.channel.id == canales[canal]["ID"]:
+                traducciones_activas[message.id] = asyncio.create_task(conectar(message,conexiones[conexion]))
+                
+                try:
+                    await traducciones_activas[message.id]
+                except asyncio.CancelledError:
+                    print(f"¿Porque tanto apuro? La traduccion de {message.id} fue cancelada...")
+                except Exception as e:
+                    print("La tarea fallo con exito (O algo así)")
+                    print(e)
+                finally:
+                    traducciones_activas.pop(message.id,None)
+
+                break
     
     #Esto hace que el bot escuche la funcion, eh, supongo que lo que hace es hacerlo esperar hasta que todo se cumpla
     await bot.process_commands(message)
@@ -27,6 +44,9 @@ async def on_message_edit(before, after):
     await editarMensajeEspejo(before,after)
     
 
+@bot.event
+async def on_message_delete(message):
 
+    await borrarMensajeEspejo(message)
 
 bot.run(llave_Discord)

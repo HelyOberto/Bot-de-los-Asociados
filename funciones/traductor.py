@@ -12,6 +12,12 @@ async def traducir(message,config):
 
     mensaje_original = message.content
 
+    for embed in message.embeds:
+        if embed.title:
+            mensaje_original += f"\n**{embed.title}**"
+        if embed.description:
+            mensaje_original += f"\n{embed.description}"
+
     if mensaje_original.strip() == "":
         return message.content
     
@@ -45,7 +51,9 @@ async def traducir(message,config):
                 Mensajes previos: {contexto}
                 Autor del mensaje: {message.author.display_name}
                 Mensaje que debes traducir: {mensaje_original}"""
-        ).text
+            )
+            respuesta = respuesta.text
+
         except:
             respuesta = traductor.translate(mensaje_original)
 
@@ -56,10 +64,19 @@ async def traducir(message,config):
     
     #Si el mensasje tiene una respuesta, y si esa respuesta existe, haz algo
     if message.reference and message.reference.resolved:
-        contenido_ref = await buscarMensaje(message.reference.resolved.id,buscar="espejo")
 
-        if not contenido_ref:
+        salto = ""
+        ref_id = await buscarMensaje(message.reference.resolved.id,buscar="espejo",ID=True)
+        if not ref_id:
             contenido_ref = traductor.translate(message.reference.resolved.content)
+        else:
+            contenido_ref = await buscarMensaje(ref_id)
+            ref_canal_id = await buscarMensaje(ref_id,buscar="canal",ID=True)
+            server_id = message.guild.id
+
+            url_mensaje = f"https://discord.com/channels/{server_id}/{ref_canal_id}/{ref_id}"
+            salto = f"\n> ([{config['boton']}]({url_mensaje}))"
+
 
 
         # Si el mensaje ya tiene una respuesta, la elimina
@@ -76,10 +93,10 @@ async def traducir(message,config):
 
         if message.reference.resolved.webhook_id:
             autor_ref = message.reference.resolved.author.id
-            traduccion = f"> {config['respuesta']} <@{autor_ref}>: *{contenido_ref}*\n{traduccion}"
+            traduccion = f"> {config['respuesta']} <@{autor_ref}>: *{contenido_ref}* {salto}\n{traduccion}"
         else:
             autor_ref = message.reference.resolved.author.display_name
-            traduccion = f"> {config['respuesta']} **{autor_ref}**: *{contenido_ref}*\n{traduccion}"
+            traduccion = f"> {config['respuesta']} **{autor_ref}**: *{contenido_ref}* {salto}\n{traduccion}"
 
     
     return traduccion

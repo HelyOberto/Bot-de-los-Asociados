@@ -51,6 +51,48 @@ async def editarMensajeEspejo(before, after):
 
                     # Ya con todo listo, solo edita el mensaje
                     await webhook.edit_message(webhook_a_traducir,content=nueva_traduccion)
+            except discord.NotFound:
+                pass
             except Exception as e:
                 print("¿Debia editar algo? Ah si, me equivoque")
                 print(e)
+
+
+async def borrarMensajeEspejo(message):
+    # Se evita asi mismo si se detecta a el mismo o se da cuenta que el mensaje ya lo habia borrado antes
+    if (message.author == bot.user) or (message.id in mensajes_borrados.values()):
+        return
+    
+    #Esto es basicamente: "ALTO AHI, a, espera, ya terminaste? xd"
+    try:
+        traducciones_activas[message.id].cancel()
+    except:
+        pass
+
+    servidor = message.guild
+
+    mensajeEspejoID = await buscarMensaje(message.id,"espejo",ID=True)
+    if not mensajeEspejoID:
+        return
+
+    canalClave = await buscarMensaje(message.id,"canal")
+    canalEspejoClave = await buscarMensaje(mensajeEspejoID,"canal")
+
+    canalEspejo = servidor.get_channel(canales[canalEspejoClave]["ID"])
+
+    if canalEspejo:
+        try:
+            msg_a_borrar = await canalEspejo.fetch_message(mensajeEspejoID)
+            await msg_a_borrar.delete()
+            mensajes_borrados[message.id] = mensajeEspejoID
+            recortarRegistro(mensajes_borrados)
+        
+        except discord.NotFound:
+            pass
+
+        except Exception as e:
+            print("OYE SIKA COMO BORRO ESTO?, No me deja...")
+            print(e)
+        
+    canales[canalClave]["historial"].pop(message.id, None)
+    canales[canalEspejoClave]["historial"].pop(mensajeEspejoID, None)

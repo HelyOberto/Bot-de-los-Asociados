@@ -3,6 +3,7 @@ from discord import Webhook
 from discord.ext import commands
 from deep_translator import GoogleTranslator
 from google import genai
+import asyncio
 import re
 import aiohttp 
 import os
@@ -21,9 +22,11 @@ intents.message_content = True
 #Esto declara el objeto que sera el bot... Creo
 bot = commands.Bot(command_prefix="$",intents=intents)
 
+traducciones_activas = {}
+
 mensajes_respondiendo = {
-    "en": "Responding to: ",
-    "es": "Respondiendo a: "
+    "en": ["Responding to: ","Go to message"],
+    "es": ["Respondiendo a: ","Ir al mensaje"]
 }
 
 canales = {
@@ -60,9 +63,31 @@ canales = {
         "historial" : {}
     }
 }
-
+mensajes_borrados = {}
+lista_webhooks = []
 for clave in canales:
     canal_idioma = canales[clave]["idioma_salida"]
-    canales[clave]["respuesta"] = mensajes_respondiendo[canal_idioma]
+    canales[clave]["respuesta"] = mensajes_respondiendo[canal_idioma][0]
+    canales[clave]["boton"] = mensajes_respondiendo[canal_idioma][1]
 
     canales[clave]["webhook_destino"] = os.getenv(clave)
+    canales[clave]["webhook_ID"] = int(re.search(r"webhooks/(\d+)/", canales[clave]["webhook_destino"]).group(1))
+    lista_webhooks.append(canales[clave]["webhook_ID"])
+
+
+
+canalesClave = list(canales.keys())
+conexiones = {
+    "escalada":[canalesClave[0],canalesClave[1]],
+    "sendero":[canalesClave[2],canalesClave[3]]
+}
+
+
+limite_mensajes = 15
+exceso = 5
+def recortarRegistro(registro):
+    if len(registro) >= limite_mensajes:
+        porBorrar = list(registro.keys())[:exceso]
+
+        for mensaje in porBorrar:
+            registro.pop(mensaje,None)

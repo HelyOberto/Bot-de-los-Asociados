@@ -1,7 +1,11 @@
 from funciones import *
 from .traductor import traducir
 
-async def conectar(message,canal_ingles,canal_espanol):
+async def conectar(message,conexion):
+    
+    canal_ingles = conexion[0]
+    canal_espanol = conexion[1]
+
     salidaClave = None
     llegadaClave = None
 
@@ -22,13 +26,6 @@ async def conectar(message,canal_ingles,canal_espanol):
     else:
         return
     
-    
-    
-
-    #Esto evita que bot no se cofunda consigo mismo, me suele pasar cuando me volteo y me miro al espejo
-    if message.webhook_id or bot.user == message.author:
-        return
-    
     try:
         #Esto extrae el webhook del canal y para usarlo
         async with aiohttp.ClientSession() as session:
@@ -36,6 +33,8 @@ async def conectar(message,canal_ingles,canal_espanol):
 
             canal_destino = bot.get_channel(llegada["ID"])
 
+            #Es esta parte ocurre la traduccion, mientes se ejecuta y se hacen los ajustes el bot muestra una señal de escribri
+            traduccion = ""
             async with canal_destino.typing():
                 traduccion = await traducir(message,salida)
 
@@ -56,12 +55,10 @@ async def conectar(message,canal_ingles,canal_espanol):
                 wait=True
             )
 
-        # lista_mensajes_id[message.id] = msj_enviado.id
 
         #Esto se encarga de actualizar el registo de mensajes
         limite_mensajes_largo = 250
 
-        # canales[salidaClave]["historial"][message.id]=( f"{message.author.display_name}: {message.content}"[:limite_mensajes])
         canales[salidaClave]["historial"][message.id] = {
             "autor": message.author.display_name,
             "contenido": message.content[:limite_mensajes_largo],
@@ -74,14 +71,9 @@ async def conectar(message,canal_ingles,canal_espanol):
             "espejo": message.id
         }
         
-        limite_mensajes = 15
-        exceso = 5
+        #Esto corta parte del regristo si este se hace muy largo
         for clave in [salidaClave,llegadaClave]:
-            if len(canales[clave]["historial"]) >= limite_mensajes:
-                mensajes_a_borrar = list(canales[clave]["historial"].keys())[:exceso]
-
-                for mensaje in mensajes_a_borrar:
-                    del canales[clave]["historial"][mensaje]
+            recortarRegistro(canales[clave]["historial"])
         
 
     except Exception as e:
