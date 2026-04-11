@@ -25,10 +25,6 @@ async def traducir(message,config):
     for link in links:
         mensaje_original = mensaje_original.replace(link,"")
 
-    contexto = ""
-    for id in config['historial']:
-        contexto += f"{config['historial'][id]['autor']}: {config['historial'][id]['contenido']}\n"
-
     #¿Como va terminar esto?
     if mensaje_original.strip() != "":
         try:
@@ -39,14 +35,13 @@ async def traducir(message,config):
                 Traduce al idioma '{config['idioma_salida']}'.
                 Reglas: 
                 - Salida: SOLO el texto traducido. Sin introducciones ni formato (cursiva/negrita).
-                - Contexto: Gaming/Discord. Adapta la jerga (slang).
+                - Contexto: Los mensajes en un contexto informal, usualmente con mucha jerga latinoamerica (Mexico, Chile, Veneuela etc), asi que te toca adaptarlos correctamente la repuesta, ademas, toma en cuenta tambien que podria ser un contexto de gaming.
                 - Emojis (CÓDIGO TÉCNICO): 
                     - Identifica cadenas con el formato '<:nombre:ID>' o '<a:nombre:ID>' (donde 'ID' es una secuencia larga de números).
                     - ESTRICTAMENTE PROHIBIDO: Traducir el 'nombre', alterar o redondear los números del 'ID', u omitir los símbolos '<', ':', '>'.
                     - TRATAMIENTO: Trátalos como constantes de programación. Deben aparecer exactamente igual en la traducción final, respetando su posición gramatical relativa para que el sentido del mensaje no se pierda.
                     - EMOJIS ESTÁNDAR: Los términos entre dos puntos (ej. :smile:) también deben permanecer intactos.
 
-                Mensajes previos: {contexto}
                 Autor del mensaje: {message.author.display_name}
                 Mensaje que debes traducir: {mensaje_original}"""
             )
@@ -84,6 +79,7 @@ async def traducir(message,config):
 
         limite = 100
         contenido_ref = contenido_ref[:limite]
+        contenido_ref = contenido_ref.split("\n")[0]
 
         if len(contenido_ref) == limite:
             contenido_ref += "..."
