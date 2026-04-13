@@ -79,6 +79,11 @@ async def on_comand(ctx,*,consulta):
 
     await consultar(ctx,consulta)
 
+@bot.command(name="contexto")
+async def on_comand(ctx):
+
+    ctx.reply(contexto)
+
 #Esto hace que Render no piense que mi bot se tomo vacaciones y lo siga obligando a trabajar por el resto de la eternidad!!!
 app = Flask('')
 
