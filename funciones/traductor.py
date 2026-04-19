@@ -11,8 +11,14 @@ async def traducir(message,config):
     except Exception as e:
         print("Se me olvido como traducir xd")
         print(e)
-
-    mensaje_original = message.content
+    
+    reenvio = False
+    #Esto toma en cuenta si el mensaje es un reenvio
+    if message.reference and (message.reference.type == discord.MessageReferenceType.forward):
+        reenvio = True 
+        mensaje_original = message.message_snapshots[0].content
+    else:
+        mensaje_original = message.content
 
     for embed in message.embeds:
         if embed.title:
@@ -42,6 +48,8 @@ async def traducir(message,config):
     else:
         traduccion = "\n".join(links)
 
+    if reenvio:
+        traduccion = f"> <:reenviado:1495526768679981167> **{config["reenviado"]}**\n> " + traduccion
     
     #Si el mensasje tiene una respuesta, y si esa respuesta existe, haz algo
     if message.reference and message.reference.resolved:

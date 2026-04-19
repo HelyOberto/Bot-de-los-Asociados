@@ -1,8 +1,13 @@
 from funciones import *
 from .traductor import traducir
 
+tokens = True
+traduccionesIniciadas = 0
+traduccionActual = 1
 async def conectar(message,conexion):
-    
+    global tokens,traduccionesIniciadas,traduccionActual
+    traduccionesIniciadas += 1
+
     canal_ingles = conexion[0]
     canal_espanol = conexion[1]
 
@@ -29,13 +34,15 @@ async def conectar(message,conexion):
     try:
         #Esto extrae el webhook del canal y para usarlo
         async with aiohttp.ClientSession() as session:
+            
+
             canal_destino = bot.get_channel(llegada["ID"])
             
             #Esto crea el boton con el mensaje de escribiendo en otro canal, cuando el mensaje llegue (O falle) se borrara
             view = discord.ui.View()
             boton = discord.ui.Button(
                 label = message.author.display_name+salida["escribiendo"],
-                emoji="<a:cargando:1494343118265258155>",
+                emoji="<a:cargando:1495241883910275172>",
                 style= discord.ButtonStyle.gray,
                 disabled=True
             )
@@ -47,28 +54,46 @@ async def conectar(message,conexion):
 
             #Es esta parte ocurre la traduccion, mientes se ejecuta y se hacen los ajustes el bot muestra una señal de escribri
             traduccion = ""
-
+            lista_archivos = []
             try:
                 traduccion = await traducir(message,salida)
 
                 #Aca se agregan los stickers y las imagenes
+                for archivo in message.attachments:
+                    bytes = await archivo.read()
+                    lista_archivos.append(discord.File(io.BytesIO(bytes),filename=archivo.filename))
+
+                if message.reference and (message.reference.type == discord.MessageReferenceType.forward):
+                    
+                    snapshot = message.message_snapshots[0]
+                    if snapshot and snapshot.attachments:
+                        for adjunto in message.snapshot.attachments:
+                            traduccion = f"\n{adjunto.url}"
+
+                
                 for sticker in message.stickers:
                     traduccion += f"\n{sticker.url}"
 
-                for archivo in message.attachments:
-                    traduccion += f"\n{archivo.url}"
-
-                if traduccion == "":
+                if traduccion == "" and lista_archivos == []:
+                    await escribiendo.delete()
                     return
-            except:
+            except Exception as e:
                 traduccion = message.content
+                print("Uhm, y si... Nadie se va dar cuentnadaa si no traduzco ")
+                print(e)
 
+            #Forma algo torpe, pero sencilla, de gestionar el orde de llegada de los mensajes
+            while traduccionesIniciadas != traduccionActual:
+                await asyncio.sleep(0.1)
+            else:
+                await asyncio.sleep(0.5)
                 
             try:
                 msj_enviado = await webhook.send(
                     content=traduccion,
                     username= message.author.display_name,
                     avatar_url= message.author.display_avatar.url,
+                    files=lista_archivos,
                     # allowed_mentions=discord.AllowedMentions(users=False),
                     wait=True
                 )
@@ -103,19 +128,23 @@ async def conectar(message,conexion):
         for clave in [salidaClave,llegadaClave]:
             recortarRegistro(canales[clave]["historial"])
         
-
+        tokens = True
     except Exception as e:
 
+        if not tokens:
+            print("Sika, algo salio mal el proceso de conexion, no me ignores y reparame!!!")
+            print(e)
 
-        print("Sika, algo salio mal el proceso de conexion, no me ignores y reparame!!!")
-        print(e)
+            general_ingles = bot.get_channel(canales[canal_ingles]["ID"])
+            general_espanol = bot.get_channel(canales[canal_espanol]["ID"])
+                
+            if general_ingles:
+                # Enviamos el mensaje indicando quién lo dijo originalmente
+                await general_ingles.send(f"Hey guy, there is posibily that I've run out of tokens, so I wont be able to translate more for today, sorry")
 
-        general_ingles = bot.get_channel(canales[canal_ingles]["ID"])
-        general_espanol = bot.get_channel(canales[canal_espanol]["ID"])
-            
-        if general_ingles:
-            # Enviamos el mensaje indicando quién lo dijo originalmente
-            await general_ingles.send(f"Hey guy, there is posibily that I've run out of tokens, so I wont be able to translate more for today, sorry")
+            if general_espanol:
+                await general_espanol.send(f"Oigan chicos, creo que me qude sin tonkens para traducir mas XD, ehm, no podre continuar por hoy, para que lo tengan claro, perdon por las molestias")
 
-        if general_espanol:
-            await general_espanol.send(f"Oigan chicos, creo que me qude sin tonkens para traducir mas XD, ehm, no podre continuar por hoy, para que lo tengan claro, perdon por las molestias")
+            tokens = False
+    
+    traduccionActual += 1

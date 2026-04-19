@@ -68,7 +68,7 @@ async def borrarMensajeEspejo(message):
     
     #Esto es basicamente: "ALTO AHI, a, espera, ya terminaste? xd"
     try:
-        traducciones_activas[message.id].cancel()
+        traduccionesActivas[message.id].cancel()
     except:
         pass
 
@@ -101,9 +101,9 @@ async def borrarMensajeEspejo(message):
     canales[canalEspejoClave]["historial"].pop(mensajeEspejoID, None)
 
 async def reaccionarMensajeEspejo(payload,borrar=False):
-    if payload.message_id in traducciones_activas:
+    if payload.message_id in traduccionesActivas:
         try:
-            await traducciones_activas[payload.message_id]
+            await traduccionesActivas[payload.message_id]
         except:
             pass
 

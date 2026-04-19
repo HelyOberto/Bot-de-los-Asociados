@@ -4,6 +4,7 @@ from funciones.coneccion import conectar
 from funciones.mensajes import *
 from funciones.resumen import *
 from funciones.consulta import consultar
+from funciones.archivos import guardarArchivo
 from funciones import consulta
 
 
@@ -17,6 +18,7 @@ async def on_ready():
 #Ahora que lo veo mejor, message se supone que va ser un objeto entero con mucha info, no solo un string, lo cual tiene sentido
 @bot.event
 async def on_message(message):
+    global traduccionesIniciadas,traduccionActual
     #Esto evita que bot no se cofunda consigo mismo, me suele pasar cuando me volteo y me miro al espejo
     if message.webhook_id in lista_webhooks:
             return
@@ -29,17 +31,17 @@ async def on_message(message):
     for conexion in conexiones.keys():
         for canal in conexiones[conexion]:
             if message.channel.id == canales[canal]["ID"]:
-                traducciones_activas[message.id] = asyncio.create_task(conectar(message,conexiones[conexion]))
+                traduccionesActivas[message.id] = asyncio.create_task(conectar(message,conexiones[conexion]))
                 
                 try:
-                    await traducciones_activas[message.id]
+                    await traduccionesActivas[message.id]
                 except asyncio.CancelledError:
                     print(f"¿Porque tanto apuro? La traduccion de {message.id} fue cancelada...")
                 except Exception as e:
                     print("La tarea fallo con exito (O algo así)")
                     print(e)
                 finally:
-                    traducciones_activas.pop(message.id,None)
+                    traduccionesActivas.pop(message.id,None)
 
                 break
 
@@ -71,6 +73,10 @@ async def on_message_delete(message):
 async def on_raw_reaction_add(payload):
 
     await reaccionarMensajeEspejo(payload)
+
+    await guardarArchivo(payload)
+
+
 
 @bot.event
 async def on_raw_reaction_remove(payload):

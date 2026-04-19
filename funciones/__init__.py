@@ -12,13 +12,14 @@ from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
 from cohere import AsyncClient
+import io
 
 load_dotenv()
 
 llave_IA = os.getenv("LLAVE_IA")
 co = AsyncClient(os.getenv("LLAVE_COHERE"))
 cliente = genai.Client(api_key=llave_IA)
-llave_Discord = os.getenv("LLAVE_DISCORD")
+llave_Discord = os.getenv("LLAVE_TEST")
 
 # Vale, entonces esto le dice a Discord que por favor me deje leer los mensajes de los usarios por favorcito
 intents = discord.Intents.default()
@@ -30,7 +31,8 @@ bot = commands.Bot(command_prefix="$",intents=intents)
 #Esto obtiene el objeto necesario para los slash commands
 tree = bot.tree
 
-traducciones_activas = {}
+#Estas funciones de encargar de manejar el orden de las traducciones
+traduccionesActivas = {}
 
 #Identificador del mensaje para que traductor lo tome  en cuenta
 marca = "\u200b"
@@ -42,8 +44,8 @@ contexto = ""
 textInicio = ""
 
 mensajes_respondiendo = {
-    "en-US": ["Responding to ","Go to message","[Image or archive]"," is writing"],
-    "es-419": ["Respondiendo a ","Ir al mensaje","[Imagen o archivo]"," esta ecribiendo"]
+    "en-US": ["Responding to ","Go to message","[Image or archive]"," is writing","Fowarded"],
+    "es-419": ["Respondiendo a ","Ir al mensaje","[Imagen o archivo]"," esta ecribiendo","Reenviado"]
 }
 
 canales = {
@@ -78,7 +80,23 @@ canales = {
         "idioma_salida": "en-US",
         "webhook_destino": "",
         "historial" : {}
-    }
+    },
+
+    "pruebaIngles" : {
+        "ID": 1495156399385088180,
+        "idioma_entrada": "en-US",
+        "idioma_salida": "es-419",
+        "historial" : {}
+    },
+
+    "pruebaEspanol" : {
+        "ID": 1495156490007482508,
+        "idioma_entrada": "es-419",
+        "idioma_salida": "en-US",
+        "historial" : {}
+    },
+
+
 }
 mensajes_borrados = {}
 lista_webhooks = []
@@ -88,6 +106,7 @@ for clave in canales:
     canales[clave]["boton"] = mensajes_respondiendo[canal_idioma][1]
     canales[clave]["archivo"] = mensajes_respondiendo[canal_idioma][2]
     canales[clave]["escribiendo"] = mensajes_respondiendo[canal_idioma][3]
+    canales[clave]["reenviado"] = mensajes_respondiendo[canal_idioma][4]
 
     canales[clave]["webhook_destino"] = os.getenv(clave)
     canales[clave]["webhook_ID"] = int(re.search(r"webhooks/(\d+)/", canales[clave]["webhook_destino"]).group(1))
@@ -98,7 +117,8 @@ for clave in canales:
 canalesClave = list(canales.keys())
 conexiones = {
     "escalada":[canalesClave[0],canalesClave[1]],
-    "sendero":[canalesClave[2],canalesClave[3]]
+    "sendero":[canalesClave[2],canalesClave[3]],
+    "prueba":[canalesClave[4],canalesClave[5]]
 }
 
 
