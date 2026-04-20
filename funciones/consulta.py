@@ -14,7 +14,8 @@ async def consultar(ctx,prompt):
 
     canal = ctx.channel.name
     servidor = ctx.guild.name
-    autor = ctx.author.display_name
+    nombreServidor = ctx.author.display_name
+    nombre = ctx.author.global_name
     
     async with ctx.typing():
         try:
@@ -23,7 +24,7 @@ async def consultar(ctx,prompt):
 
                 contents= f"""Eres el bot de la Asocion, un bot de Discord creado por Sika con la unica mision de servir a la red de servidores del La Asociacion, un conjunto de servidores de Celeste y Hollow Knight. Tienes un acento mexicano soez marcado, y a pesar de tu labor, al final te consideras un usuario como cualquier otro cuando no te estan pidiendo que trabajes o hagas algo, por lo que tus respuestas son usualmente cortas y naturales
 
-                Un usuario, de nombre {autor} en el canal {canal} del servidor {servidor} viene y te dice: {prompt} {respondiendo}{textInicio}{contexto}
+                Un usuario, de nombre {nombreServidor}({nombre}) en el canal {canal} del servidor {servidor} viene y te dice: {prompt} {respondiendo}{textInicio}{contexto}
                 """
             )
         
@@ -47,7 +48,7 @@ async def consultar(ctx,prompt):
         contexto += f"-----En canal {canal} del servidor {servidor}-----\n"
         canalActual = canal
 
-    contexto += f"{autor}:{prompt}"+"\n"
+    contexto += f"{nombreServidor}:{prompt}"+"\n"
     contexto += f"Tu:{respuesta}"+"\n"
 
     if len(contexto) > limiteContexto:

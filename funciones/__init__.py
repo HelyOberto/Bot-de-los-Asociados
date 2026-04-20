@@ -35,6 +35,9 @@ tree = bot.tree
 
 #Estas funciones de encargar de manejar el orden de las traducciones
 traduccionesActivas = {}
+#Aca se guardan los mensajes que son enviados al MD
+mensajesMD = {}
+usuariosConMD = []
 
 #Identificador del mensaje para que traductor lo tome  en cuenta
 marca = "\u200b"
@@ -124,10 +127,10 @@ conexiones = {
 }
 
 
-limite_mensajes = 15
+limiteMensajes = 15
 exceso = 5
-def recortarRegistro(registro):
-    if len(registro) >= limite_mensajes:
+def recortarRegistro(registro,limiteMensajes=limiteMensajes,exceso=exceso):
+    if len(registro) >= limiteMensajes:
         porBorrar = list(registro.keys())[:exceso]
 
         for mensaje in porBorrar:
