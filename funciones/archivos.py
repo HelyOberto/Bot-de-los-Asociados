@@ -24,7 +24,10 @@ async def guardarArchivo(payload):
     descripcion = f"> Servidor: **{mensaje.guild.name}**\n> Publicado por: **{mensaje.author.display_name} ({mensaje.author.name})**"
 
     if mensaje.content != "":
-        descripcion += f'\n> "*{mensaje.content}*"'
+        if poseeLinks:
+            descripcion += f'\n" {mensaje.content} "'
+        else:
+            descripcion += f'\n> "*{mensaje.content}*"'
 
     try:   
         directorio = os.path.dirname(__file__)
