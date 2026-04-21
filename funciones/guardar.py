@@ -1,4 +1,5 @@
 from funciones import *
+from mensajes import filtrarMensajesPings
 
 async def archivo(payload):
 
@@ -42,7 +43,7 @@ async def archivo(payload):
             usuariosConMD.append(usuario.id)
 
         mensajeResultado = await usuario.send(descripcion,files=listaArchivos)
-        
+
         mensajesMD[mensajeResultado.id] = mensajeResultado
         recortarRegistro(mensajesMD,exceso=1)
 
@@ -91,7 +92,7 @@ async def fueraDeContexto(payload):
             webhook = Webhook.from_url(config["webhook"],session=session)
 
             resultado = await webhook.send(
-                content=mensaje.content,
+                content=filtrarMensajesPings(mensaje.guild,mensaje.content),
                 username=victima.display_name,
                 avatar_url= victima.display_avatar.url,
                 files=listaArchivos,
