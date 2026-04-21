@@ -63,6 +63,7 @@ async def conectar(message,conexion):
                     bytes = await archivo.read()
                     lista_archivos.append(discord.File(io.BytesIO(bytes),filename=archivo.filename))
 
+                #Aca en especifico se hace un manejo de lo mensajes
                 if message.reference and (message.reference.type == discord.MessageReferenceType.forward):
                     
                     snapshot = message.message_snapshots[0]

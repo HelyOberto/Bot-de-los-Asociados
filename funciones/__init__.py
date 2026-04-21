@@ -101,21 +101,37 @@ canales = {
         "historial" : {}
     },
 
+    "senderoContexto": {
+        "ID": 1051626976227635230,
+        "historial": []
+    },
 
+    "escaladaContexto": {
+        "ID": 1087034941793112084,
+        "historial": []
+    },
 }
 mensajes_borrados = {}
 lista_webhooks = []
 for clave in canales:
-    canal_idioma = canales[clave]["idioma_salida"]
-    canales[clave]["respuesta"] = mensajes_respondiendo[canal_idioma][0]
-    canales[clave]["boton"] = mensajes_respondiendo[canal_idioma][1]
-    canales[clave]["archivo"] = mensajes_respondiendo[canal_idioma][2]
-    canales[clave]["escribiendo"] = mensajes_respondiendo[canal_idioma][3]
-    canales[clave]["reenviado"] = mensajes_respondiendo[canal_idioma][4]
 
-    canales[clave]["webhook_destino"] = os.getenv(clave)
-    canales[clave]["webhook_ID"] = int(re.search(r"webhooks/(\d+)/", canales[clave]["webhook_destino"]).group(1))
-    lista_webhooks.append(canales[clave]["webhook_ID"])
+    if "idioma_salida" in canales[clave]:
+        canal_idioma = canales[clave]["idioma_salida"]
+        canales[clave]["respuesta"] = mensajes_respondiendo[canal_idioma][0]
+        canales[clave]["boton"] = mensajes_respondiendo[canal_idioma][1]
+        canales[clave]["archivo"] = mensajes_respondiendo[canal_idioma][2]
+        canales[clave]["escribiendo"] = mensajes_respondiendo[canal_idioma][3]
+        canales[clave]["reenviado"] = mensajes_respondiendo[canal_idioma][4]
+
+        canales[clave]["webhook_destino"] = os.getenv(clave)
+    else:
+        canales[clave]["webhook"] = os.getenv(clave)
+
+    for web in ["weebhook","webhook_destino"]:
+
+        if web in canales[clave]:
+            canales[clave]["webhook_ID"] = int(re.search(r"webhooks/(\d+)/", canales[clave][web]).group(1))
+            lista_webhooks.append(canales[clave]["webhook_ID"])
 
 
 
