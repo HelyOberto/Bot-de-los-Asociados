@@ -30,7 +30,7 @@ async def archivo(payload):
     #Esta cosa es para que la hora se ajusta la del usuaro y tenga un formato lindo
     fechaFormato = f"<t:{int(mensaje.created_at.timestamp())}:f>"
 
-    descripcion = f"> Servidor: **{mensaje.guild.name}**\n> Canal: **{mensaje.channel.name}**\n> Fecha y hora: **{fechaFormato}**\n> Publicado por: **{mensaje.author.display_name} ({mensaje.author.name})**\n> Mensaje original: **{mensaje.jump_url}**"
+    descripcion = f"> Publicado por: **{mensaje.author.display_name} ({mensaje.author.name})**\n> Canal: **{mensaje.channel.name}**\n> Servidor: **{mensaje.guild.name}**\n> Fecha y hora: **{fechaFormato}**\n> Mensaje original: **{mensaje.jump_url}**"
 
 
     try:   
