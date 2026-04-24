@@ -2,7 +2,12 @@ from funciones import *
 
 async def rankingEstrellas(ctx):
     cursor = topEstrellas.find().sort([("estrellas",-1)]).limit(10)
+
     ranking = list(cursor)
+
+    if not ranking:
+        ctx.send("Todavia no hay nadie en el ranking ⭐")
+        return
 
     anchoIzquierda = max([len(str(x["usuario"])) for x in ranking])
 
@@ -29,7 +34,8 @@ async def rankingEstrellas(ctx):
         resultado += f"**`{nombre}|{i}|{puntuacion}`**\n"
 
     embed = discord.Embed(
-        title="Top de estrellas 🏆 \n\n"+resultado,
+        title="Top de estrellas 🏆",
+        description=resultado,
         color=0xFFFF00
     )
 

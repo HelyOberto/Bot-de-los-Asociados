@@ -14,6 +14,8 @@ async def archivo(payload,quitar=False):
     else:
         autor = mensaje.guild.get_member(mensaje.author.id) or await mensaje.guild.fetch_member(mensaje.author.id)
 
+    #Desgraciados, ya me rompieron el bot, esto deberia solucionarlo
+
     usuario = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
 
     if usuario.bot:
