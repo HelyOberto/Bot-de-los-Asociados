@@ -145,11 +145,46 @@ async def on_comand(ctx):
 
     await ctx.reply("No tengo contexto todavia..."+marca)
 
+@bot.command(name="actualizarNiveles")
+async def on_comand(ctx):
+    if ctx.author.id != 612445390314274826:
+        return
+
+    usuarios = list(usuarios_info.find())
+
+    for usuario in usuarios:
+
+        nombre = usuario["discriminador_discord"]
+        criterio = {"discriminador_discord":nombre}
+
+
+        xp = usuario["estadisticas"]["xp"]
+        nivel = 0
+        for _ in nivelesXP:
+            if nivelesXP[nivel] > xp:
+                break
+            nivel += 1
+
+        
+        if nivel == 0:
+            xpAnterior = 0
+        else:
+            xpAnterior = nivelesXP[nivel-1]
+        
+        porcentaje = round( 100*((xp-xpAnterior)/(nivelesXP[nivel]-xpAnterior)))
+
+        usuarios_info.update_one(criterio,
+                                {"$set":{"estadisticas.nivel":nivel,
+                                        "estadisticas.porcentaje":porcentaje
+                                        }}
+                                )
+    await ctx.reply("Niveles actualizados con exito!")
+
 @tree.command(name="top",description="Muestra el top de usuarios con mas estrellas del servidor")
 @app_commands.choices(categoria=[
     app_commands.Choice(name="Estrellas",value="estrellas"),
     app_commands.Choice(name="Corazones",value="corazones"),
-    app_commands.Choice(name="Nivel",value="nivel"),
+    app_commands.Choice(name="Niveles",value="xp"),
     app_commands.Choice(name="Descontextualizaciones",value="descontextualizaciones")
 ])
 async def on_comand(interaction: discord.Interaction,categoria: app_commands.Choice[str]):

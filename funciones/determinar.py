@@ -44,3 +44,4 @@ async def niveles(message):
     usuarios_info.update_one(criterio,
                             {"$set":{"estadisticas.porcentaje":porcentaje}}
                             )
+

@@ -1,8 +1,6 @@
 from funciones import *
 
-paginaActual = 0
 botones = []
-seleccion = "estrellas"
 
 for texto in ["Anterior","Siguiente"]:
     boton = discord.ui.Button(
@@ -12,11 +10,8 @@ for texto in ["Anterior","Siguiente"]:
     )
     botones.append(boton)
 
-async def ranking(ctx=False,select="estrellas"):
-    global paginaActual,botones,seleccion
-
-    if select != seleccion:
-        seleccion = select
+async def ranking(ctx=False,select="estrellas",paginaActual=0):
+    global botones
     ventana = 10
 
     selectInfo = {
@@ -27,61 +22,69 @@ async def ranking(ctx=False,select="estrellas"):
         
     }
 
-    cursor = usuarios_info.find().sort([(f"estadisticas.{select}",-1)])
+    cursor = usuarios_info.find().sort(f"estadisticas.{select}",-1)
 
     listaTop = list(cursor)
 
-    if not listaTop and ctx:
-        ctx.send(f"Todavia no hay nadie en el ranking {selectInfo[select]["emoji"]}")
+    if not listaTop:
+        if ctx:
+            ctx.send(f"Todavia no hay nadie en este ranking")
         return
     
-    nombres = [str(x["discriminador_discord"]).replace(" ","") for x in listaTop]
-    valores = [str(x["estadisticas"][select]) for x in listaTop]
-
-    tope = ventana+paginaActual*ventana
-    if tope > len(nombres):
-        tope = len(nombres)
-
-    rango = range(paginaActual*ventana,tope)
-
-    anchoIzquierda = max([len(x) for x in nombres[rango.start:tope]])
-
-    if anchoIzquierda < len("Usuario"):
-        anchoIzquierda = len("Usuario") 
-
-    anchoCentro = len(str(len(listaTop)))
-
-    if anchoCentro < len("Top"):
-        anchoCentro = len("Top") 
 
 
-    resultado = "**`"+"Usuario".rjust(anchoIzquierda)+"|"+"Top".center(anchoCentro)+"|"+f"{selectInfo[select]["emoji"]}`**\n"
-    for i in rango:
+    nombres = [str(x["nombre"]).replace(" ","") for x in listaTop]
 
-        usuario = nombres[i].rjust(anchoIzquierda)
-        top = str(i+1).center(anchoCentro)
+    if select == "xp":
+        embed = await rankingNiveles(listaTop,nombres,paginaActual)
+    else:
 
-        puntuacion = valores[i]
-        if len(puntuacion) == 1:
-            puntuacion += " "
+        valores = [str(x["estadisticas"][select]) for x in listaTop]
 
-        resultado += f"**`{usuario}|{top}|{puntuacion}`**\n"
+        tope = ventana+(paginaActual*ventana)
+        if tope > len(nombres):
+            tope = len(nombres)
 
-    embed = discord.Embed(
-        title=f"Top de {select} 🏆",
-        description=resultado,
-        color=selectInfo[select]["color"]
-    )
+        rango = range(paginaActual*ventana,tope)
 
-    if "pie" in selectInfo[select]:
-        embed.set_footer(text=selectInfo[select]["pie"])
+        anchoIzquierda = max([len(x) for x in nombres[rango.start:tope]])
+
+        if anchoIzquierda < len("Usuario"):
+            anchoIzquierda = len("Usuario") 
+
+        anchoCentro = len(str(len(listaTop)))
+
+        if anchoCentro < len("Top"):
+            anchoCentro = len("Top") 
+
+
+        resultado = "**`"+"Usuario".rjust(anchoIzquierda)+"|"+"Top".center(anchoCentro)+"|"+f"{selectInfo[select]["emoji"]}`**\n"
+        for i in rango:
+
+            usuario = nombres[i].rjust(anchoIzquierda)
+            top = str(i+1).center(anchoCentro)
+
+            puntuacion = valores[i]
+            if len(puntuacion) == 1:
+                puntuacion += " "
+
+            resultado += f"**`{usuario}|{top}|{puntuacion}`**\n"
+
+        embed = discord.Embed(
+            title=f"Top de {select} 🏆",
+            description=resultado,
+            color=selectInfo[select]["color"]
+        )
+
+        if "pie" in selectInfo[select]:
+            embed.set_footer(text=selectInfo[select]["pie"])
 
     if not ctx:
         return embed
 
     async def cambiarPagina(interaction):
-            global paginaActual,botones,seleccion
-
+            global botones
+            nonlocal paginaActual,select
             match interaction.data["custom_id"]:
                 case "siguiente": paginaActual += 1
                 case "anterior": paginaActual -= 1
@@ -90,16 +93,25 @@ async def ranking(ctx=False,select="estrellas"):
             for boton in botones:
                 if boton.label == "Anterior" and paginaActual < 1:
                     continue
+                
+                try:
+                    limite = len(embed)
+                except:
+                    limite = len(nombres)
 
-                if boton.label == "Siguiente" and (paginaActual+1)*ventana > len(nombres):
+                if boton.label == "Siguiente" and (paginaActual+1)*ventana > limite:
                     continue
 
                 boton.callback = cambiarPagina
 
                 view.add_item(boton)
 
-            embed =  await ranking(select=seleccion)
-            await interaction.response.edit_message(embed=embed,view=view)
+            embed =  await ranking(select=select,paginaActual=paginaActual)
+
+            if isinstance(embed,list):
+                await interaction.response.edit_message(embeds=embed,view=view)
+            else:
+                await interaction.response.edit_message(embed=embed,view=view)
 
     view = discord.ui.View()
 
@@ -108,7 +120,70 @@ async def ranking(ctx=False,select="estrellas"):
 
     view.add_item(boton)
     
-    await ctx.send(embed=embed,view=view)
+    if isinstance(embed,list):
+        await ctx.send(embeds=embed,view=view)
+    else:
+        await ctx.send(embed=embed,view=view)
+
+async def rankingNiveles(listaTop,nombres,paginaActual):
+    mensajes = [str(x["estadisticas"]["mensajes"]) for x in listaTop]
+    xps = [str(x["estadisticas"]["xp"]) for x in listaTop]
+    niveles = [str(x["estadisticas"]["nivel"]) for x in listaTop]
+    porcentajes = [str(x["estadisticas"]["porcentaje"]) for x in listaTop]
+
+    embeds = []
+    largo = 30
+    ventana = 10
+    limiteInferior = paginaActual*ventana
+
+    descripcion = ""
+    nivelActual = niveles[limiteInferior]
+    colorIndice = 1
+    
+    for usuario in range(limiteInferior,limiteInferior+ventana):
+        
+        if nivelActual == 0:
+            nivelAnteriorXP = 0
+        else:
+            nivelAnteriorXP = nivelesXP[int(nivelActual)-1]
+
+        xpAvanzado = int(xps[usuario]) - nivelAnteriorXP
+        xpTotal = nivelesXP[int(nivelActual)] - nivelAnteriorXP
+        xpFaltante = xpTotal - xpAvanzado
+
+        cargador = crearCargador(int(porcentajes[usuario]),largo=largo)
+
+        descripcion += f"## {usuario+1}. {nombres[usuario]}\n"
+
+        descripcion += f"{xps[usuario]} xp".center(int(largo/2),"ㅤ")
+        descripcion += f"{mensajes[usuario]} mensajes".center(int(largo/2),"ㅤ") + "\n"
+
+        descripcion += f"ㅤㅤㅤ**{porcentajes[usuario]}%**ㅤㅤㅤ".center(largo,"ㅤ") + "\n"
+        descripcion += f"{cargador}\n"
+        descripcion += f"_{xpAvanzado}/{xpTotal}xp ({xpFaltante} restante)_\n"
+
+        # Este codigo ctm se encarga de dividir los embeds
+        if usuario+1 == len(niveles) or niveles[usuario+1] != nivelActual:
+            if paginaActual > 0:
+                color = 0x3e3e3e
+            else:
+                match colorIndice:
+                    case 1: color = 0xe4eb23
+                    case 2: color = 0xe0e0e0
+                    case 3: color = 0xff8500
+                    case _: color = 0x3e3e3e
+
+            embeds.append(discord.Embed(
+                title=f"Nivel {nivelActual}",
+                description=descripcion,
+                color = color
+            ))
+            descripcion = ""
+            if usuario+1 != len(niveles):
+                nivelActual = niveles[usuario+1]
+            colorIndice += 1
+
+    return embeds
 
 async def usuarioInfo(interaction,objetivo=None):
 
