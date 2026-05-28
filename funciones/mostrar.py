@@ -22,7 +22,7 @@ async def ranking(ctx=False,select="estrellas",paginaActual=0):
         
     }
 
-    filtro = {"discriminador_discord": {"$ne":"Bot de los Asociados"}}
+    filtro = {"discriminador_discord": {"$nin":["Bot de los Asociados","Bot de Testeo"]}}
     cursor = usuarios_info.find(filtro).sort(f"estadisticas.{select}",-1)
 
     listaTop = list(cursor)
