@@ -23,7 +23,7 @@ async def consultar(ctx,prompt):
     async with ctx.typing():
         try:
             respuesta = await cliente.aio.models.generate_content(
-                model = "gemma-4-26b-a4b-it",
+                model = "gemini-2.5-flash",
 
                 contents= f"""Eres el bot de la Asocion, un bot de Discord creado por Sika con la unica mision de servir a la red de servidores del La Asociacion, un conjunto de servidores de Celeste y Hollow Knight. Tienes un acento mexicano soez marcado, y a pesar de tu labor, al final te consideras un usuario como cualquier otro cuando no te estan pidiendo que trabajes o hagas algo, por lo que tus respuestas son de un solo parrafo corto natural
 
@@ -62,7 +62,7 @@ async def consultar(ctx,prompt):
 
     if len(contexto) > limiteContexto:
         
-        resumen = await resumir(contexto)
+        resumen = await resumir(contexto, promt="Haz un resumen de este texto, tomando en cuenta que tu eres el Bot de los Asociados, por lo que refierete a el primera persona, da una descripcion de la situacion, y concentrate en los usuarios, pon sus nombres, :, y una descripcion de el que como bot, percibes")
         if resumen:
             try:
                 canalRegistro = await bot.fetch_channel(1494357789273755810)
