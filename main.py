@@ -51,7 +51,7 @@ async def on_message(message):
 
     #Aca reacciona el bot si lo mencionan, o le responden directamente, reutilzando el codigo del comando
     mencionado = bot.user in message.mentions
-    respondido = (message.reference and message.reference.resolved) and (message.reference.resolved == bot.user and marca in message.content)
+    respondido = (message.reference and message.reference.resolved) and (message.reference.resolved == bot.user and marca in message.reference.resolved.content)
 
     if mencionado or respondido:
 
