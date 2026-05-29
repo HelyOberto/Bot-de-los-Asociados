@@ -6,9 +6,6 @@ canalActual = ""
 async def consultar(ctx,prompt):
     global contexto, textInicio,limiteContexto,canalActual
 
-    if marca not in prompt:
-        return
-
     respondiendo = ""
     if ctx.message.reference and ctx.message.reference.resolved:
         mensaje_respondido = ctx.message.reference.resolved
