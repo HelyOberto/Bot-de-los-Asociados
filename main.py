@@ -50,10 +50,10 @@ async def on_message(message):
                 break
 
     #Aca reacciona el bot si lo mencionan, o le responden directamente, reutilzando el codigo del comando
-    mencionado = bot.user in message.mentions
-    respondido = (message.reference and message.reference.resolved) and (message.reference.resolved == bot.user and marca in message.reference.resolved.content)
+    mencionado = f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content
+    respondido = (message.reference and message.reference.resolved) and (message.reference.resolved.author == bot.user and marca in message.reference.resolved.content)
 
-    if mencionado or respondido:
+    if respondido or mencionado:
 
         ctx = await bot.get_context(message)
         
