@@ -118,7 +118,7 @@ async def pregunta(interaction: discord.Interaction,texto:str):
     if not pregunta:
         return
 
-    await preguntar(interaction.followup,pregunta)
+    await preguntar(interaction,pregunta)
 
 @tree.command(name="resume",description="Pidele al bot que resuma un texto por ti")
 async def pregunta(interaction: discord.Interaction,texto:str):
