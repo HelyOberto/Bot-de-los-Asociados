@@ -103,13 +103,10 @@ async def preguntar(ctx, promt):
     canal = ctx.channel.name
     servidor = ctx.guild.name
 
-    try:
-        autor = ctx.user
-    except:
-        autor = ctx.author
-    
+    autor = ctx.author
     if autor == bot.user:
         return
+    
     nombreServidor = autor.display_name
     nombre = autor.global_name
 

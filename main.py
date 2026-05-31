@@ -115,10 +115,12 @@ async def on_comand(ctx,*,pregunta):
 async def pregunta(interaction: discord.Interaction,texto:str):
     await interaction.response.defer()
 
-    if not pregunta:
+    if not texto:
         return
+    
+    ctx = await bot.get_context(interaction)
 
-    await preguntar(interaction,pregunta)
+    await preguntar(ctx,texto)
 
 @tree.command(name="resume",description="Pidele al bot que resuma un texto por ti")
 async def pregunta(interaction: discord.Interaction,texto:str):
