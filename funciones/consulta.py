@@ -96,8 +96,8 @@ async def preguntar(ctx, promt):
 
     canal = ctx.channel.name
     servidor = ctx.guild.name
-    nombreServidor = ctx.author.display_name
-    nombre = ctx.author.global_name
+    nombreServidor = ctx.user.display_name
+    nombre = ctx.user.global_name
 
     respuesta = await cliente.aio.models.generate_content(
                 model = "gemma-4-26b-a4b-it",
