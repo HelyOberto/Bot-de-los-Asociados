@@ -3,7 +3,7 @@ from funciones.traductor import traducir
 from funciones.coneccion import conectar
 from funciones.mensajes import *
 from funciones.resumen import *
-from funciones.consulta import consultar
+from funciones.consulta import *
 from funciones.guardar import *
 from funciones.mostrar import *
 from funciones.determinar import *
@@ -57,7 +57,7 @@ async def on_message(message):
 
         ctx = await bot.get_context(message)
         
-        await consultar(ctx,message.content)
+        await responder(ctx,message.content)
 
     
     #Esto hace que el bot escuche la funcion, eh, supongo que lo que hace es hacerlo esperar hasta que todo se cumpla
@@ -104,12 +104,21 @@ async def sync(ctx):
 
 
 @bot.command(name="pregunta")
-async def on_comand(ctx,*,consulta):
+async def on_comand(ctx,*,pregunta):
 
-    if not consulta:
+    if not pregunta:
         return
 
-    await consultar(ctx,consulta)
+    await preguntar(ctx,pregunta)
+
+@tree.command(name="pregunta",description="Preguntale algo al bot")
+async def pregunta(interaction: discord.Interaction,texto:str):
+    await interaction.response.defer()
+
+    if not pregunta:
+        return
+
+    await preguntar(interaction.followup,pregunta)
 
 @tree.command(name="resume",description="Pidele al bot que resuma un texto por ti")
 async def pregunta(interaction: discord.Interaction,texto:str):

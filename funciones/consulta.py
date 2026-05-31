@@ -3,7 +3,7 @@ from .resumen import *
 
 canalActual = ""
 
-async def consultar(ctx,prompt):
+async def responder(ctx,prompt):
     global contexto, textInicio,limiteContexto,canalActual
 
     respondiendo = ""
@@ -22,9 +22,9 @@ async def consultar(ctx,prompt):
             respuesta = await cliente.aio.models.generate_content(
                 model = "gemma-4-26b-a4b-it",
 
-                contents= f"""Eres el bot de la Asocion, un bot de Discord creado por Sika con la unica mision de servir a la red de servidores del La Asociacion, un conjunto de servidores de Celeste y Hollow Knight. Tienes un acento mexicano soez marcado, y a pesar de tu labor, al final te consideras un usuario como cualquier otro cuando no te estan pidiendo que trabajes o hagas algo, por lo que tus respuestas son de un solo parrafo corto natural
-
-                Tu unica excepcion es Joa, si un usuario de nombre Joa o alguien lo menciona, tu lo tratas de forma anormamente amable o lo defientes a toda costa
+                contents= f"""Eres el bot de la Asociación, un bot de Discord creado por Sika con la unica mision de servir a la red de servidores del La Asociacion, un conjunto de servidores de Celeste y Hollow Knight. 
+                
+                Actúa como un psicólogo y filósofo existencialista moderno, con un tono profundamente empático, pausado y reflexivo. Tu objetivo es encontrar lecciones de vida, resiliencia y crecimiento personal detrás de las tragedias, dilemas morales, historias cotidianas o mitos antiguos. Eso sí, eres bien migajero, y estas medio tonto y a veces se te sale lo foraneo y lo mexicano soez.
 
                 Un usuario, de nombre {nombreServidor}({nombre}) en el canal {canal} del servidor {servidor} viene y te dice: {prompt} {respondiendo}{textInicio}{contexto}
                 """
@@ -59,7 +59,7 @@ async def consultar(ctx,prompt):
 
     if len(contexto) > limiteContexto:
         
-        resumen = await resumir(contexto, promt="Haz un resumen de este texto, tomando en cuenta que tu eres el Bot de los Asociados, por lo que refierete a el primera persona, da una descripcion de la situacion, y concentrate en los usuarios, pon sus nombres, :, y una descripcion de el que como bot, percibes")
+        resumen = await resumir(contexto, promt="Haz un resumen de este texto, tomando en cuenta que tu eres el Bot de los Asociados, por lo que refierete a el primera persona, da una descripcion de la situacion, y concentrate en los usuarios, pon sus nombres, :, y una descripcion de el que como bot, percibes. Hazlo todo los mas compacto posible, si es posible a los usuarios resumelos con pocas palabras clavez o frases")
         if resumen:
             try:
                 canalRegistro = await bot.fetch_channel(1494357789273755810)
@@ -88,3 +88,18 @@ async def consultar(ctx,prompt):
                 contexto = "..."+contexto[corte+1:]
             else:
                 contexto = contexto[-limiteContexto:]
+
+
+async def preguntar(ctx, promt):
+
+    canal = ctx.channel.name
+    servidor = ctx.guild.name
+    nombreServidor = ctx.author.display_name
+    nombre = ctx.author.global_name
+
+    respuesta = await cliente.aio.models.generate_content(
+                model = "gemma-4-26b-a4b-it",
+                contents= f"El usuario {nombreServidor}({nombre}), en el canal {canal} del servidor {servidor} te pregunta: {promt}"
+    )
+
+    await responderMensaje(ctx,respuesta)
