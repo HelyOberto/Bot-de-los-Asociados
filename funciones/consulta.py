@@ -104,4 +104,6 @@ async def preguntar(ctx, promt):
                 contents= f"El usuario {nombreServidor}({nombre}), en el canal {canal} del servidor {servidor} te pregunta: {promt}"
     )
 
+    respuesta = respuesta.text
+
     await responderMensaje(ctx,respuesta)
