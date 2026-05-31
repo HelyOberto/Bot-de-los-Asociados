@@ -14,7 +14,13 @@ async def responder(ctx,prompt):
 
     canal = ctx.channel.name
     servidor = ctx.guild.name
-    nombreServidor = ctx.author.display_name
+    autor = ctx.author
+
+    #Recuerda la noche y madrugada del 30 y 31 de mayo de 2026
+    if autor == bot.user:
+        return
+
+    nombreServidor = autor.display_name
     nombre = ctx.author.global_name
     
     async with ctx.typing():
@@ -96,8 +102,16 @@ async def preguntar(ctx, promt):
 
     canal = ctx.channel.name
     servidor = ctx.guild.name
-    nombreServidor = ctx.user.display_name
-    nombre = ctx.user.global_name
+
+    try:
+        autor = ctx.user
+    except:
+        autor = ctx.author
+    
+    if autor == bot.user:
+        return
+    nombreServidor = autor.display_name
+    nombre = autor.global_name
 
     respuesta = await cliente.aio.models.generate_content(
                 model = "gemma-4-26b-a4b-it",
