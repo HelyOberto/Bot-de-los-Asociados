@@ -112,7 +112,10 @@ async def preguntar(ctx, promt):
 
     respuesta = await cliente.aio.models.generate_content(
                 model = "gemma-4-26b-a4b-it",
-                contents= f"El usuario {nombreServidor}({nombre}), en el canal {canal} del servidor {servidor} te pregunta: {promt}"
+                contents= f"""El usuario {nombreServidor}({nombre}), en el canal {canal} del servidor {servidor} te pregunta: {promt}
+
+                Respondele directamente (No a mi), como mucho llamalo por su nombre fuera del parentesis, el resto de datos solo mencionalos si lo consideras necesarios o si te place
+                """
     )
 
     respuesta = respuesta.text
